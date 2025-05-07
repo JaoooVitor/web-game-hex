@@ -1,0 +1,21 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f5f5f5;
+  }
+  
+  polygon {
+    stroke: black;
+    stroke-width: 1;
+    fill: #ddd;
+    cursor: pointer;
+  }
+  
+  .azul {
+    fill: #3498db !important;
+  }
+  
+  .vermelha {
+    fill: #e74c3c !important;
+  }
+  
