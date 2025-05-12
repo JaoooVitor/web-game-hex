@@ -3,80 +3,117 @@
 let profundidadeIA = 3;
 let jogadorAtual = "azul";
 
-// Atualiza profundidade
+const vezTexto = document.getElementById("vezDoJogador");
+const infoIA = document.getElementById("infoIA");
+
 const seletorDificuldade = document.getElementById("dificuldade");
 seletorDificuldade.addEventListener("change", (e) => {
   profundidadeIA = parseInt(e.target.value);
+  atualizarInfoIA();
 });
 
-// Atualiza tipo de IA
 const seletorTipo = document.getElementById("tipoIA");
+seletorTipo.addEventListener("change", atualizarInfoIA);
 
-// Evento de clique do jogador humano
 function onHexClick(hex, linha, coluna) {
   if (!hex.classList.contains("azul") && !hex.classList.contains("vermelha")) {
     hex.classList.add(jogadorAtual);
     estado[linha][coluna] = jogadorAtual;
 
     if (verificaVitoria(jogadorAtual)) {
-      setTimeout(() => {
-        alert(`${jogadorAtual.toUpperCase()} venceu o jogo!`);
-      }, 10);
+      mostrarVitoria(jogadorAtual);
       return;
     }
 
     jogadorAtual = jogadorAtual === "azul" ? "vermelha" : "azul";
+    atualizarVez();
 
     if (jogadorAtual === "vermelha") {
-      setTimeout(() => {
-        jogadaIA();
-      }, 300);
+      setTimeout(() => jogadaIA(), 300);
     }
   }
 }
 
-// Inicia o tabuleiro
 gerarTabuleiro(onHexClick);
+atualizarVez();
+atualizarInfoIA();
 
-// Reiniciar jogo
-const btnReiniciar = document.getElementById("reiniciar");
-btnReiniciar.addEventListener("click", () => {
+document.getElementById("reiniciar").addEventListener("click", () => {
   for (let i = 0; i < tamanho; i++) {
     for (let j = 0; j < tamanho; j++) {
       estado[i][j] = null;
     }
   }
-  const hexes = document.querySelectorAll("polygon");
-  hexes.forEach(hex => hex.classList.remove("azul", "vermelha"));
+  document.querySelectorAll("polygon").forEach(hex => hex.classList.remove("azul", "vermelha"));
   jogadorAtual = "azul";
+  atualizarVez();
+  vezTexto.classList.remove("vitoria");
 });
 
 function jogadaIA() {
-  let melhorJogada;
+  const jogada = seletorTipo.value === "alphabeta"
+    ? minimaxAlphaBeta(estado, profundidadeIA, true, -Infinity, +Infinity)
+    : minimax(estado, profundidadeIA, true);
 
-  if (seletorTipo.value === "alphabeta") {
-    melhorJogada = minimaxAlphaBeta(estado, profundidadeIA, true, -Infinity, +Infinity);
-  } else {
-    melhorJogada = minimax(estado, profundidadeIA, true);
-  }
+  if (!jogada) return;
 
-  if (!melhorJogada) return;
-
-  const [linha, coluna] = melhorJogada.movimento;
+  const [linha, coluna] = jogada.movimento;
   const hex = document.querySelector(`polygon[data-linha='${linha}'][data-coluna='${coluna}']`);
   if (hex) {
     hex.classList.add("vermelha");
     estado[linha][coluna] = "vermelha";
 
     if (verificaVitoria("vermelha")) {
-      setTimeout(() => {
-        alert("VERMELHA venceu o jogo!");
-      }, 10);
+      mostrarVitoria("vermelha");
       return;
     }
 
     jogadorAtual = "azul";
+    atualizarVez();
   }
+}
+
+function atualizarVez() {
+  if (vezTexto) {
+    vezTexto.innerHTML = `Vez do jogador: <span style="color:${jogadorAtual === "azul" ? "blue" : "red"}">${jogadorAtual.toUpperCase()}</span>`;
+  }
+}
+
+function atualizarInfoIA() {
+  if (infoIA) {
+    infoIA.textContent = `IA: ${seletorTipo.value.toUpperCase()} | Profundidade: ${profundidadeIA}`;
+  }
+}
+
+function mostrarVitoria(vencedor) {
+  if (vezTexto) {
+    const cor = vencedor === "azul" ? "blue" : "red";
+    vezTexto.innerHTML = `<span style="color:${cor}; font-weight:bold">${vencedor.toUpperCase()}</span> venceu o jogo! 🎉`;
+    vezTexto.classList.add("vitoria");
+  }
+}
+
+function gerarJogadasVizinhas(estadoAtual) {
+  const jogadas = new Set();
+  let temPeca = false;
+  for (let i = 0; i < tamanho; i++) {
+    for (let j = 0; j < tamanho; j++) {
+      if (estadoAtual[i][j] !== null) {
+        temPeca = true;
+        for (const [l, c] of getVizinhos(i, j)) {
+          if (estadoAtual[l][c] === null) jogadas.add(`${l},${c}`);
+        }
+      }
+    }
+  }
+  if (!temPeca) {
+    for (let i = 0; i < tamanho; i++) {
+      for (let j = 0; j < tamanho; j++) {
+        jogadas.add(`${i},${j}`);
+      }
+    }
+  }
+  return Array.from(jogadas).map(str => str.split(",").map(Number));
 }
 
 function minimax(estadoAtual, profundidadeMax, ehIA) {
@@ -87,13 +124,7 @@ function minimax(estadoAtual, profundidadeMax, ehIA) {
     return { valor };
   }
 
-  const jogadas = [];
-  for (let i = 0; i < tamanho; i++) {
-    for (let j = 0; j < tamanho; j++) {
-      if (estadoAtual[i][j] === null) jogadas.push([i, j]);
-    }
-  }
-
+  const jogadas = gerarJogadasVizinhas(estadoAtual);
   let melhorValor = ehIA ? -Infinity : +Infinity;
   let melhorMovimento = null;
 
@@ -102,16 +133,12 @@ function minimax(estadoAtual, profundidadeMax, ehIA) {
     novoEstado[linha][coluna] = ehIA ? "vermelha" : "azul";
     const resultado = minimax(novoEstado, profundidadeMax - 1, !ehIA);
 
-    if (ehIA) {
-      if (resultado.valor > melhorValor) {
-        melhorValor = resultado.valor;
-        melhorMovimento = [linha, coluna];
-      }
-    } else {
-      if (resultado.valor < melhorValor) {
-        melhorValor = resultado.valor;
-        melhorMovimento = [linha, coluna];
-      }
+    if (ehIA && resultado.valor > melhorValor) {
+      melhorValor = resultado.valor;
+      melhorMovimento = [linha, coluna];
+    } else if (!ehIA && resultado.valor < melhorValor) {
+      melhorValor = resultado.valor;
+      melhorMovimento = [linha, coluna];
     }
   }
 
@@ -126,13 +153,7 @@ function minimaxAlphaBeta(estadoAtual, profundidadeMax, ehIA, alfa, beta) {
     return { valor };
   }
 
-  const jogadas = [];
-  for (let i = 0; i < tamanho; i++) {
-    for (let j = 0; j < tamanho; j++) {
-      if (estadoAtual[i][j] === null) jogadas.push([i, j]);
-    }
-  }
-
+  const jogadas = gerarJogadasVizinhas(estadoAtual);
   let melhorValor = ehIA ? -Infinity : +Infinity;
   let melhorMovimento = null;
 

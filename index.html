@@ -7,13 +7,21 @@
 </head>
 <body>
   <h1>Jogo HEX</h1>
+
+<main>
   <svg id="hexTabuleiro" width="800" height="700"></svg>
-  <label for="dificuldade">Tipo de IA:</label>
-  <select id="tipoIA">
-    <option value="minimax">Minimax</option>
-    <option value="alphabeta" selected>Minimax + Alfa-Beta</option>
-  </select>
-  <label for="dificuldade">Profundidade da IA:</label>
+
+  <div id="painelLateral">
+    <p id="vezDoJogador"></p>
+    <p id="infoIA"></p>
+
+    <label for="tipoIA">Tipo de IA:</label>
+    <select id="tipoIA">
+      <option value="minimax">Minimax</option>
+      <option value="alphabeta" selected>Minimax + Alfa-Beta</option>
+    </select>
+
+    <label for="dificuldade">Profundidade da IA:</label>
     <select id="dificuldade">
       <option value="1">1</option>
       <option value="2">2</option>
@@ -25,7 +33,11 @@
       <option value="8">8</option>
       <option value="9">9</option>
     </select>
-  <button id="reiniciar">Reiniciar Jogo</button>
+
+    <button id="reiniciar">Reiniciar Jogo</button>
+  </div>
+</main>
+
   <script src="map_generator.js"></script>
   <script src="main.js"></script>
 </body>

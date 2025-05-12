@@ -1,37 +1,95 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f5f5f5;
+}
+
+polygon {
+  stroke: black;
+  stroke-width: 1;
+  fill: #ddd;
+  cursor: pointer;
+}
+
+.azul {
+  fill: #3498db !important;
+}
+
+.vermelha {
+  fill: #e74c3c !important;
+}
+
+#hexTabuleiro {
+  display: block;
+  margin: 0 auto;
+}
+
+#vezDoJogador,
+#infoIA {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+#vezDoJogador {
+  color: #444;
+}
+
+#infoIA {
+  color: #666;
+  font-size: 14px;
+}
+
+
+#reiniciar {
+  margin-top: 15px;
+  padding: 8px 16px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#reiniciar:hover {
+  background-color: #45a049;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 30px;
+}
+
+#hexTabuleiro {
+  margin: 0;
+}
+
+#painelLateral {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 20px;
+  font-size: 16px;
+  gap: 10px;
+}
+
+#vezDoJogador.vitoria {
+  font-size: 28px;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
   }
-  
-  polygon {
-    stroke: black;
-    stroke-width: 1;
-    fill: #ddd;
-    cursor: pointer;
+  to {
+    transform: scale(1.1);
   }
-  
-  .azul {
-    fill: #3498db !important;
-  }
-  
-  .vermelha {
-    fill: #e74c3c !important;
-  }
-  
-  #reiniciar {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #444;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  #reiniciar:hover {
-    background-color: #666;
-  }
-  
+}

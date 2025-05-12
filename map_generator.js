@@ -1,8 +1,7 @@
-
 // Geração do mapa HEX - tabuleiro base
 const svg = document.getElementById("hexTabuleiro");
-const tamanho = 6;
-const raio = 20;
+const tamanho = 11;
+const raio = 18;
 const alturaHex = Math.sqrt(3) * raio;
 
 // Estado lógico do jogo
@@ -92,17 +91,18 @@ function avaliarEstado(jogador) {
     distancia[i] = new Array(tamanho).fill(Infinity);
   }
 
-  // inicia da borda correta
+  const inimigo = jogador === "vermelha" ? "azul" : "vermelha";
+
   if (jogador === "vermelha") {
     for (let col = 0; col < tamanho; col++) {
-      if (estado[0][col] !== "azul") {
+      if (estado[0][col] !== inimigo) {
         fila.push([0, col]);
         distancia[0][col] = 0;
       }
     }
   } else {
     for (let lin = 0; lin < tamanho; lin++) {
-      if (estado[lin][0] !== "vermelha") {
+      if (estado[lin][0] !== inimigo) {
         fila.push([lin, 0]);
         distancia[lin][0] = 0;
       }
@@ -116,7 +116,17 @@ function avaliarEstado(jogador) {
     visitado.add(chave);
 
     for (const [l, c] of getVizinhos(linha, coluna)) {
-      const peso = estado[l][c] === jogador ? 0 : estado[l][c] === null ? 1 : 5;
+      let peso;
+      if (estado[l][c] === jogador) {
+        peso = 0;
+      } else if (estado[l][c] === null) {
+        const vizinhos = getVizinhos(l, c);
+        const aliadosProximos = vizinhos.filter(([x, y]) => estado[x][y] === jogador).length;
+        peso = 2 - aliadosProximos * 0.3; // incentiva conexões
+      } else if (estado[l][c] === inimigo) {
+        peso = 8; // bloqueio forte
+      }
+
       const novaDist = distancia[linha][coluna] + peso;
       if (novaDist < distancia[l][c]) {
         distancia[l][c] = novaDist;
@@ -138,6 +148,3 @@ function avaliarEstado(jogador) {
 
   return -menor;
 }
-
-
-
