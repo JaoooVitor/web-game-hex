@@ -1,4 +1,3 @@
-// main.js
 
 let profundidadeIA = 3;
 let jogadorAtual = "azul";
@@ -95,7 +94,7 @@ function mostrarVitoria(vencedor) {
 
 function gerarJogadasVizinhas(estadoAtual) {
   const jogadas = new Set();
-  let temPeca = false;
+  let temPeca = false; 
   for (let i = 0; i < tamanho; i++) {
     for (let j = 0; j < tamanho; j++) {
       if (estadoAtual[i][j] !== null) {

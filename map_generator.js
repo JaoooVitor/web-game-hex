@@ -39,9 +39,9 @@ function gerarTabuleiro(onClickHexagono) {
 
 function getVizinhos(linha, coluna) {
   const direcoes = [
-    [-1, 0], [1, 0],
-    [0, -1], [0, 1],
-    [-1, 1], [1, -1]
+    [-1, 0], [1, 0],        // cima e baixo
+    [0, -1], [0, 1],        // esquerda e direita
+    [-1, 1], [1, -1]        // diagonais em grid hexagonal
   ];
 
   const vizinhos = [];
