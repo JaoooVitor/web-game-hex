@@ -92,19 +92,23 @@ function mostrarVitoria(vencedor) {
   }
 }
 
-function gerarJogadasVizinhas(estadoAtual) {
+function gerarJogadasVizinhas(estadoAtual, jogador = "vermelha") {
   const jogadas = new Set();
-  let temPeca = false; 
+  let temPeca = false;
+
   for (let i = 0; i < tamanho; i++) {
     for (let j = 0; j < tamanho; j++) {
-      if (estadoAtual[i][j] !== null) {
+      if (estadoAtual[i][j] === jogador) {
         temPeca = true;
         for (const [l, c] of getVizinhos(i, j)) {
-          if (estadoAtual[l][c] === null) jogadas.add(`${l},${c}`);
+          if (estadoAtual[l][c] === null) {
+            jogadas.add(`${l},${c}`);
+          }
         }
       }
     }
   }
+
   if (!temPeca) {
     for (let i = 0; i < tamanho; i++) {
       for (let j = 0; j < tamanho; j++) {
@@ -112,18 +116,28 @@ function gerarJogadasVizinhas(estadoAtual) {
       }
     }
   }
-  return Array.from(jogadas).map(str => str.split(",").map(Number));
+
+  const jogadasArray = Array.from(jogadas).map(s => s.split(",").map(Number));
+
+  // Ordenar: células com mais aliados ao redor vêm primeiro
+  return jogadasArray.sort((a, b) => {
+    const vizA = getVizinhos(a[0], a[1]).filter(([x, y]) => estadoAtual[x][y] === jogador).length;
+    const vizB = getVizinhos(b[0], b[1]).filter(([x, y]) => estadoAtual[x][y] === jogador).length;
+    return vizB - vizA;
+  });
 }
+
+
 
 function minimax(estadoAtual, profundidadeMax, ehIA) {
   if (verificaVitoria("vermelha")) return { valor: +Infinity };
   if (verificaVitoria("azul")) return { valor: -Infinity };
   if (profundidadeMax === 0) {
-    const valor = avaliarEstado("vermelha") - avaliarEstado("azul");
+    const valor = avaliarEstado(ehIA ? "vermelha" : "azul");
     return { valor };
   }
 
-  const jogadas = gerarJogadasVizinhas(estadoAtual);
+  const jogadas = gerarJogadasVizinhas(estadoAtual, ehIA ? "vermelha" : "azul");
   let melhorValor = ehIA ? -Infinity : +Infinity;
   let melhorMovimento = null;
 
@@ -148,11 +162,11 @@ function minimaxAlphaBeta(estadoAtual, profundidadeMax, ehIA, alfa, beta) {
   if (verificaVitoria("vermelha")) return { valor: +Infinity };
   if (verificaVitoria("azul")) return { valor: -Infinity };
   if (profundidadeMax === 0) {
-    const valor = avaliarEstado("vermelha") - avaliarEstado("azul");
+    const valor = avaliarEstado(ehIA ? "vermelha" : "azul");
     return { valor };
   }
 
-  const jogadas = gerarJogadasVizinhas(estadoAtual);
+  const jogadas = gerarJogadasVizinhas(estadoAtual, ehIA ? "vermelha" : "azul");
   let melhorValor = ehIA ? -Infinity : +Infinity;
   let melhorMovimento = null;
 

@@ -83,53 +83,50 @@ function verificaVitoria(jogador) {
 }
 
 function avaliarEstado(jogador) {
+  const inimigo = jogador === "vermelha" ? "azul" : "vermelha";
+  const dist = Array.from({ length: tamanho }, () => Array(tamanho).fill(Infinity));
   const visitado = new Set();
   const fila = [];
-  const distancia = [];
-
-  for (let i = 0; i < tamanho; i++) {
-    distancia[i] = new Array(tamanho).fill(Infinity);
-  }
-
-  const inimigo = jogador === "vermelha" ? "azul" : "vermelha";
 
   if (jogador === "vermelha") {
     for (let col = 0; col < tamanho; col++) {
       if (estado[0][col] !== inimigo) {
+        dist[0][col] = estado[0][col] === jogador ? 0 : 1;
         fila.push([0, col]);
-        distancia[0][col] = 0;
       }
     }
   } else {
     for (let lin = 0; lin < tamanho; lin++) {
       if (estado[lin][0] !== inimigo) {
+        dist[lin][0] = estado[lin][0] === jogador ? 0 : 1;
         fila.push([lin, 0]);
-        distancia[lin][0] = 0;
       }
     }
   }
 
   while (fila.length > 0) {
+    fila.sort((a, b) => dist[a[0]][a[1]] - dist[b[0]][b[1]]);
     const [linha, coluna] = fila.shift();
     const chave = `${linha},${coluna}`;
     if (visitado.has(chave)) continue;
     visitado.add(chave);
 
-    for (const [l, c] of getVizinhos(linha, coluna)) {
+    const vizinhos = getVizinhos(linha, coluna);
+    for (const [l, c] of vizinhos) {
+      if (estado[l][c] === inimigo) continue;
+
       let peso;
       if (estado[l][c] === jogador) {
         peso = 0;
-      } else if (estado[l][c] === null) {
-        const vizinhos = getVizinhos(l, c);
-        const aliadosProximos = vizinhos.filter(([x, y]) => estado[x][y] === jogador).length;
-        peso = 2 - aliadosProximos * 0.3; // incentiva conexões
-      } else if (estado[l][c] === inimigo) {
-        peso = 8; // bloqueio forte
+      } else {
+        const viz = getVizinhos(l, c);
+        const aliados = viz.filter(([x, y]) => estado[x][y] === jogador).length;
+        peso = 1 - aliados * 0.2; // valoriza células ligadas
       }
 
-      const novaDist = distancia[linha][coluna] + peso;
-      if (novaDist < distancia[l][c]) {
-        distancia[l][c] = novaDist;
+      const novaDist = dist[linha][coluna] + peso;
+      if (novaDist < dist[l][c]) {
+        dist[l][c] = novaDist;
         fila.push([l, c]);
       }
     }
@@ -138,13 +135,16 @@ function avaliarEstado(jogador) {
   let menor = Infinity;
   if (jogador === "vermelha") {
     for (let col = 0; col < tamanho; col++) {
-      menor = Math.min(menor, distancia[tamanho - 1][col]);
+      menor = Math.min(menor, dist[tamanho - 1][col]);
     }
   } else {
     for (let lin = 0; lin < tamanho; lin++) {
-      menor = Math.min(menor, distancia[lin][tamanho - 1]);
+      menor = Math.min(menor, dist[lin][tamanho - 1]);
     }
   }
 
   return -menor;
 }
+
+
+
