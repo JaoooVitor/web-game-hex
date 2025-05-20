@@ -127,8 +127,6 @@ function gerarJogadasVizinhas(estadoAtual, jogador = "vermelha") {
   });
 }
 
-
-
 function minimax(estadoAtual, profundidadeMax, ehIA) {
   if (verificaVitoria("vermelha")) return { valor: +Infinity };
   if (verificaVitoria("azul")) return { valor: -Infinity };
